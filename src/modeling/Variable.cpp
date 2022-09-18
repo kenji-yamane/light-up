@@ -14,12 +14,20 @@ std::map<Domain, char> Variable::domainToAscii = std::map<Domain, char>{
 };
 
 Variable::Variable() {
-    this->restrictionsCount = 0;
     this->value = Domain::UNDEFINED;
 }
 
 char Variable::prettyDomain() const {
     return Variable::domainToAscii[this->value];
+}
+
+std::list<Variable>::iterator eraseVariable(
+        std::list<Variable> &variables, std::list<Variable>::iterator it
+) {
+    auto aux = it;
+    std::advance(it, 1);
+    variables.erase(aux);
+    return it;
 }
 
 }

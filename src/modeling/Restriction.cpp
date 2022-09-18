@@ -3,10 +3,11 @@
 //
 
 #include "Restriction.h"
+#include <iostream>
 
 namespace modeling {
 
-Restriction::Restriction(int sum) : sum(sum) {}
+Restriction::Restriction(int sum) : sum(sum), lightBulbs(0) {}
 
 void Restriction::addSquare(int line, int column) {
     this->squares.emplace_back(line, column);
@@ -23,6 +24,27 @@ Domain Restriction::interpret() const {
         return Domain::LIGHT_BULB;
     }
     return Domain::UNDEFINED;
+}
+
+bool Restriction::canAddLightBulbs() const {
+    return (this->lightBulbs < this->sum);
+}
+
+bool Restriction::addLightBulb() {
+    if (not this->canAddLightBulbs()) {
+        return false;
+    }
+    this->lightBulbs++;
+    return true;
+}
+
+std::list<Restriction>::iterator eraseRestriction(
+        std::list<Restriction> &restrictions, std::list<Restriction>::iterator it
+) {
+    auto aux = it;
+    std::advance(it, 1);
+    restrictions.erase(aux);
+    return it;
 }
 
 }

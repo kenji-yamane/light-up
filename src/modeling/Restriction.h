@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <vector>
+#include <list>
 
 #include "modeling/Variable.h"
 
@@ -14,15 +15,22 @@ namespace modeling {
 
 class Restriction {
 public:
-    Restriction(int sum);
+    explicit Restriction(int sum);
     void addSquare(int line, int column);
-    Domain interpret() const;
+    [[nodiscard]] Domain interpret() const;
+    [[nodiscard]] bool canAddLightBulbs() const;
+    bool addLightBulb();
 
     std::vector<std::pair<int, int> > squares;
 
 private:
     int sum;
+    int lightBulbs;
 };
+
+std::list<Restriction>::iterator eraseRestriction(
+        std::list<Restriction> &restrictions, std::list<Restriction>::iterator it
+);
 
 }
 

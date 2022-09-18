@@ -6,6 +6,7 @@
 #define LIGHT_UP_AGENT_VARIABLE_H
 
 #include <map>
+#include <list>
 
 namespace modeling {
 
@@ -19,14 +20,17 @@ enum class Domain {
 class Variable {
 public:
     Variable();
-    char prettyDomain() const;
+    [[nodiscard]] char prettyDomain() const;
 
     Domain value;
-    int restrictionsCount;
 
 private:
     static std::map<Domain, char> domainToAscii;
 };
+
+std::list<Variable>::iterator eraseVariable(
+        std::list<Variable> &variables, std::list<Variable>::iterator it
+);
 
 }
 
