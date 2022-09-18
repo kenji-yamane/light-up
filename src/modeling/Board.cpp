@@ -5,6 +5,7 @@
 #include "Board.h"
 
 #include <iostream>
+#include <algorithm>
 
 namespace modeling {
 
@@ -61,7 +62,7 @@ void Board::initializeBoard() {
         std::vector<Node> nodeRow;
         for (int j = 0; j < this->size; j++) {
             nodeRow.push_back(Node{
-                Variable(),
+                Variable(i, j),
                 Restriction(0),
                 false,
                 false
@@ -100,6 +101,7 @@ void Board::interpretRestrictions() {
                     for (const auto &pos : n.restriction.squares) {
                         this->boardMatrix[pos.first][pos.second].variable.value = Domain::EMPTY;
                     }
+                    n.restrict = false;
                     break;
                 case Domain::LIGHT_BULB:
                     for (const auto &pos : n.restriction.squares) {
@@ -108,6 +110,7 @@ void Board::interpretRestrictions() {
                             return;
                         }
                     }
+                    n.restrict = false;
                     break;
                 case Domain::IMPOSSIBLE:
                     for (const auto &pos : n.restriction.squares) {
@@ -119,6 +122,35 @@ void Board::interpretRestrictions() {
             }
         }
     }
+}
+
+std::list<std::pair<int, int> > Board::degreeHeuristic() {
+    for (const auto &row : this->boardMatrix) {
+        for (const auto &n : row) {
+            if (not n.restrict) {
+                continue;
+            }
+            for (const auto &square : n.restriction.squares) {
+                this->boardMatrix[square.first][square.second].variable.restrictionsCount++;
+            }
+        }
+    }
+
+    std::vector<Variable> undefinedVariables;
+    for (const auto &row : this->boardMatrix) {
+        for (const auto &n : row) {
+            if (n.variable.value == Domain::UNDEFINED) {
+                undefinedVariables.push_back(n.variable);
+            }
+        }
+    }
+    std::sort(undefinedVariables.begin(), undefinedVariables.end(), compareVariables);
+
+    std::list<std::pair<int, int> > prioritized;
+    for (const auto &v : undefinedVariables) {
+        prioritized.emplace_back(v.line, v.column);
+    }
+    return prioritized;
 }
 
 std::set<std::pair<int, int> > Board::lightUp(int line, int column) {

@@ -13,12 +13,16 @@ std::map<Domain, char> Variable::domainToAscii = std::map<Domain, char>{
     {Domain::UNDEFINED, '?'},
 };
 
-Variable::Variable() {
+Variable::Variable(int line, int column) : line(line), column(column) {
     this->value = Domain::UNDEFINED;
 }
 
 char Variable::prettyDomain() const {
     return Variable::domainToAscii[this->value];
+}
+
+bool compareVariables(Variable a, Variable b) {
+    return (a.restrictionsCount > b.restrictionsCount);
 }
 
 std::list<Variable>::iterator eraseVariable(

@@ -19,14 +19,19 @@ enum class Domain {
 
 class Variable {
 public:
-    Variable();
+    Variable(int line, int column);
+
     [[nodiscard]] char prettyDomain() const;
 
     Domain value;
+    int restrictionsCount;
+    int line, column;
 
 private:
     static std::map<Domain, char> domainToAscii;
 };
+
+bool compareVariables(Variable a, Variable b);
 
 std::list<Variable>::iterator eraseVariable(
         std::list<Variable> &variables, std::list<Variable>::iterator it

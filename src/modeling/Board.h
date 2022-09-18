@@ -28,6 +28,7 @@ public:
     void addWall(int line, int column);
     void addNumberedWall(int line, int column, int num);
     void interpretRestrictions();
+    std::list<std::pair<int, int> > degreeHeuristic();
     bool assertViability();
     bool assertLightBulb(int line, int column);
     std::set<std::pair<int, int> > lightUp(int line, int column);

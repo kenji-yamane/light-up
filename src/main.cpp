@@ -18,7 +18,10 @@ int main() {
         std::cout << "a solution does not exist" << std::endl;
         return 0;
     }
-    std::cout << board.assertLightBulb(1, 5) << std::endl;
+    auto prioritized = board.degreeHeuristic();
     board.printBoard();
+    for (const auto &v : prioritized) {
+        std::cout << v.first << " " << v.second << std::endl;
+    }
     return 0;
 }
