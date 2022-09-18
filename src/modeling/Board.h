@@ -11,8 +11,18 @@
 namespace modeling {
 
 class Board {
+public:
+    Board();
+    Board(int size);
+    ~Board();
+
+    void printBoard();
 
 private:
+    void initializeBoard();
+    bool assertViability();
+
+    int size;
     std::vector<std::vector<Variable*> > boardMatrix;
     std::vector<std::vector<Restriction*> > restrictionsMatrix;
 };

@@ -1,10 +1,9 @@
 #include <iostream>
 
-#include "modeling/Variable.h"
+#include "modeling/Board.h"
 
 int main() {
-    modeling::Variable v;
-    std::cout << "number of restrictions: " << v.restrictionsCount << std::endl;
-    std::cout << "undefined: " << (v.value == modeling::Domain::UNDEFINED ? "yes" : "no") << std::endl;
+    modeling::Board board(14);
+    board.printBoard();
     return 0;
 }
