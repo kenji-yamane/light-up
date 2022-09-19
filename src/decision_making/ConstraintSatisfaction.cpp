@@ -41,10 +41,18 @@ bool ConstraintSatisfaction::solve(State s) {
         if (s.board.assertEmpty(variable.first, variable.second)) {
             children.push_back(decision_making::ConstraintSatisfaction::nextState(s, Light::OFF, variable));
         }
-        for (const auto& next : children) {
+        int branches = 0;
+        for (auto& next : children) {
+            if (not next.board.assertViability()) {
+                continue;
+            }
+            branches++;
             if (this->solve(next)) {
                 return true;
             }
+        }
+        if (branches == 0) {
+            return false;
         }
     }
     return false;

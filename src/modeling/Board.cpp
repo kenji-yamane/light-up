@@ -42,16 +42,19 @@ void Board::addNumberedWall(int line, int column, int num) {
 
 bool Board::assertLightBulb(int line, int column) {
     for (const auto &conn : this->connections) {
-        int currLine = line + conn.first, currColumn = column + conn.second;
-        if (not this->isPosValid(currLine, currColumn)) {
+        int neighborLine = line + conn.first, neighborColumn = column + conn.second;
+        if (not this->isPosValid(neighborLine, neighborColumn)) {
             continue;
         }
-        if (not this->boardMatrix[currLine][currColumn].restrict) {
+        if (not this->boardMatrix[neighborLine][neighborColumn].restrict) {
             continue;
         }
-        if (not this->boardMatrix[currLine][currColumn].restriction.canAddLightBulbs()) {
+        if (not this->boardMatrix[neighborLine][neighborColumn].restriction.canAddLightBulbs()) {
             return false;
         }
+    }
+    for (const auto &conn : this->connections) {
+        int currLine = line + conn.first, currColumn = column + conn.second;
         while (this->isPosValid(currLine, currColumn) && !this->boardMatrix[currLine][currColumn].wall) {
             if (not this->assertEmpty(currLine, currColumn)) {
                 return false;
@@ -66,6 +69,9 @@ bool Board::assertLightBulb(int line, int column) {
 bool Board::assertEmpty(int line, int column) {
     if (this->boardMatrix[line][column].variable.value == Domain::EMPTY) {
         return true;
+    }
+    if (this->boardMatrix[line][column].variable.value != Domain::UNDEFINED) {
+        return false;
     }
     for (const auto &conn : this->connections) {
         int neighborLine = line + conn.first, neighborColumn = column + conn.second;
@@ -216,6 +222,9 @@ std::set<std::pair<int, int> > Board::lightDown(int line, int column) {
         this->boardMatrix[line][column].variable.value = Domain::IMPOSSIBLE;
         return affectedVariables;
     }
+    if (this->boardMatrix[line][column].variable.value == Domain::EMPTY) {
+        return affectedVariables;
+    }
     this->boardMatrix[line][column].variable.value = Domain::EMPTY;
     affectedVariables.insert(std::pair<int, int>(line, column));
     for (const auto &conn : this->connections) {
@@ -234,7 +243,11 @@ void Board::print() {
     for (const auto &row : this->boardMatrix) {
         std::cout << "|";
         for (const auto &n : row) {
-            std::cout << n.variable.prettyDomain() << "|";
+            if (n.wall) {
+                std::cout << "-" << "|";
+            } else {
+                std::cout << n.variable.prettyDomain() << "|";
+            }
         }
         std::cout << std::endl;
     }
