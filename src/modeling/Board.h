@@ -32,7 +32,7 @@ public:
     bool assertViability();
     bool assertLightBulb(int line, int column);
     std::set<std::pair<int, int> > lightUp(int line, int column);
-    void printBoard();
+    void print();
 
 private:
     void initializeBoard();

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "modeling/Board.h"
+#include "decision_making/ConstraintSatisfaction.h"
 
 int main() {
     modeling::Board board(7);
@@ -13,15 +14,13 @@ int main() {
     board.addWall(6, 0);
     board.addNumberedWall(6, 5, 1);
     board.addWall(6, 6);
-    board.interpretRestrictions();
-    if (not board.assertViability()) {
-        std::cout << "a solution does not exist" << std::endl;
+
+    decision_making::ConstraintSatisfaction agent(board);
+    if (not agent.solve()) {
+        std::cout << "no solution was found" << std::endl;
         return 0;
     }
-    auto prioritized = board.degreeHeuristic();
-    board.printBoard();
-    for (const auto &v : prioritized) {
-        std::cout << v.first << " " << v.second << std::endl;
-    }
+    std::cout << "number of iterations: " << agent.nodesVisited << std::endl;
+    agent.solution.print();
     return 0;
 }

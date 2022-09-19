@@ -25,13 +25,4 @@ bool compareVariables(Variable a, Variable b) {
     return (a.restrictionsCount > b.restrictionsCount);
 }
 
-std::list<Variable>::iterator eraseVariable(
-        std::list<Variable> &variables, std::list<Variable>::iterator it
-) {
-    auto aux = it;
-    std::advance(it, 1);
-    variables.erase(aux);
-    return it;
-}
-
 }

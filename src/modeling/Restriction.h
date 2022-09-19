@@ -28,10 +28,6 @@ private:
     int lightBulbs;
 };
 
-std::list<Restriction>::iterator eraseRestriction(
-        std::list<Restriction> &restrictions, std::list<Restriction>::iterator it
-);
-
 }
 
 

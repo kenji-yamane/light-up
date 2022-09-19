@@ -179,7 +179,7 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
     return affectedVariables;
 }
 
-void Board::printBoard() {
+void Board::print() {
     if (not this->assertViability()) {
         std::cout << "there is not a solution to the given problem" << std::endl;
         return;

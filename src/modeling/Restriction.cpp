@@ -38,13 +38,4 @@ bool Restriction::addLightBulb() {
     return true;
 }
 
-std::list<Restriction>::iterator eraseRestriction(
-        std::list<Restriction> &restrictions, std::list<Restriction>::iterator it
-) {
-    auto aux = it;
-    std::advance(it, 1);
-    restrictions.erase(aux);
-    return it;
-}
-
 }
