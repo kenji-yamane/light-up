@@ -30,55 +30,30 @@ bool ConstraintSatisfaction::solve(State s) {
     this->nodesVisited++;
     if (s.undefinedVariables.empty()) {
         this->solution = s.board;
-        return true;
+        return s.board.enlightened();
     }
 
     for (const auto &variable : s.undefinedVariables) {
-        std::vector<State> children;
-        if (s.board.assertLightBulb(variable.first, variable.second)) {
-            children.push_back(decision_making::ConstraintSatisfaction::nextState(s, Light::ON, variable));
+        auto next = s;
+        auto affectedVariables = next.board.lightUp(variable.first, variable.second);
+        if (not next.board.assertViability()) {
+            continue;
         }
-        if (s.board.assertEmpty(variable.first, variable.second)) {
-            children.push_back(decision_making::ConstraintSatisfaction::nextState(s, Light::OFF, variable));
-        }
-        int branches = 0;
-        for (auto& next : children) {
-            if (not next.board.assertViability()) {
-                continue;
-            }
-            branches++;
-            if (this->solve(next)) {
-                return true;
+        auto it = next.undefinedVariables.begin();
+        while (it != next.undefinedVariables.end()) {
+            if (affectedVariables.find(std::pair(it->first, it->second)) != affectedVariables.end()) {
+                auto aux = it;
+                std::advance(it, 1);
+                next.undefinedVariables.erase(aux);
+            } else {
+                std::advance(it, 1);
             }
         }
-        if (branches == 0) {
-            return false;
+        if (this->solve(next)) {
+            return true;
         }
     }
     return false;
-}
-
-State ConstraintSatisfaction::nextState(decision_making::State s, decision_making::Light l, std::pair<int, int> pos) {
-    std::set<std::pair<int, int> > affectedVariables;
-    switch (l) {
-        case Light::ON:
-            affectedVariables = s.board.lightUp(pos.first, pos.second);
-            break;
-        case Light::OFF:
-            affectedVariables = s.board.lightDown(pos.first, pos.second);
-            break;
-    }
-    auto it = s.undefinedVariables.begin();
-    while (it != s.undefinedVariables.end()) {
-        if (affectedVariables.find(std::pair(it->first, it->second)) != affectedVariables.end()) {
-            auto aux = it;
-            std::advance(it, 1);
-            s.undefinedVariables.erase(aux);
-        } else {
-            std::advance(it, 1);
-        }
-    }
-    return s;
 }
 
 }

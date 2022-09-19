@@ -18,6 +18,7 @@ struct Node {
     Restriction restriction;
     bool wall{};
     bool restrict{};
+    bool enlightened{};
 };
 
 class Board {
@@ -32,6 +33,7 @@ public:
     bool assertViability();
     bool assertLightBulb(int line, int column);
     bool assertEmpty(int line, int column);
+    bool enlightened() const;
     std::set<std::pair<int, int> > lightUp(int line, int column);
     std::set<std::pair<int, int> > lightDown(int line, int column);
     void print();
@@ -41,6 +43,8 @@ private:
     [[nodiscard]] bool isPosValid(int line, int column) const;
 
     int size;
+    int lights;
+    int walls;
     std::vector<std::vector<Node> > boardMatrix;
     std::vector<std::pair<int, int> > connections;
 };

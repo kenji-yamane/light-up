@@ -14,5 +14,8 @@ target_link_libraries(first modeling decision_making)
 add_executable(second second.cpp)
 target_link_libraries(second modeling decision_making)
 
+add_executable(third third.cpp)
+target_link_libraries(third modeling decision_making)
+
 target_include_directories(modeling PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(decision_making PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

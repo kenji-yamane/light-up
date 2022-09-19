@@ -12,7 +12,7 @@ namespace modeling {
 Board::Board() : Board(7) {
 }
 
-Board::Board(int size) : size(size) {
+Board::Board(int size) : size(size), lights(0), walls(0) {
     this->initializeBoard();
     this->connections = std::vector<std::pair<int, int> >{
         {0, 1}, {0, -1}, {1, 0}, {-1, 0}
@@ -25,6 +25,7 @@ void Board::addWall(int line, int column) {
         return;
     }
 
+    this->walls++;
     this->boardMatrix[line][column].variable.value = Domain::EMPTY;
     this->boardMatrix[line][column].wall = true;
 }
@@ -188,6 +189,10 @@ std::list<std::pair<int, int> > Board::degreeHeuristic() {
     return prioritized;
 }
 
+bool Board::enlightened() const {
+    return (this->lights + this->walls == this->size*this->size);
+}
+
 std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
     std::set<std::pair<int, int> > affectedVariables;
     if (not this->assertLightBulb(line, column)) {
@@ -195,6 +200,7 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
         return affectedVariables;
     }
     this->boardMatrix[line][column].variable.value = Domain::LIGHT_BULB;
+    this->lights++;
     affectedVariables.insert(std::pair<int, int>(line, column));
     for (const auto &conn : this->connections) {
         int currLine = line + conn.first, currColumn = column + conn.second;
@@ -205,6 +211,10 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
             this->boardMatrix[currLine][currColumn].restriction.addLightBulb();
         }
         while (this->isPosValid(currLine, currColumn) && !this->boardMatrix[currLine][currColumn].wall) {
+            if (not this->boardMatrix[currLine][currColumn].enlightened) {
+                this->boardMatrix[currLine][currColumn].enlightened = true;
+                this->lights++;
+            }
             auto affectedFromDown = this->lightDown(currLine, currColumn);
             for (const auto &v : affectedFromDown) {
                 affectedVariables.insert(std::pair<int, int>(v.first, v.second));

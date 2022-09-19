@@ -9,11 +9,6 @@
 
 namespace decision_making {
 
-enum class Light {
-    ON,
-    OFF
-};
-
 struct State {
     std::list<std::pair<int, int> > undefinedVariables;
     modeling::Board board;
@@ -29,7 +24,6 @@ public:
 
 private:
     bool solve(State s);
-    static State nextState(State s, Light l, std::pair<int, int> pos);
 
     modeling::Board initialBoard;
 };
