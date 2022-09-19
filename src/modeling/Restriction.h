@@ -20,12 +20,15 @@ public:
     [[nodiscard]] Domain interpret() const;
     [[nodiscard]] bool canAddLightBulbs() const;
     bool addLightBulb();
+    [[nodiscard]] bool canAddEmpty() const;
+    bool addEmpty();
 
     std::vector<std::pair<int, int> > squares;
 
 private:
     int sum;
     int lightBulbs;
+    int empties;
 };
 
 }

@@ -16,11 +16,12 @@ int main() {
     board.addWall(6, 6);
 
     decision_making::ConstraintSatisfaction agent(board);
-    if (not agent.solve()) {
+    bool solvable = agent.solve();
+    std::cout << "number of iterations: " << agent.nodesVisited << std::endl;
+    if (not solvable) {
         std::cout << "no solution was found" << std::endl;
         return 0;
     }
-    std::cout << "number of iterations: " << agent.nodesVisited << std::endl;
     agent.solution.print();
     return 0;
 }

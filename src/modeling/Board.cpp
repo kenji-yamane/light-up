@@ -42,6 +42,32 @@ void Board::addNumberedWall(int line, int column, int num) {
 
 bool Board::assertLightBulb(int line, int column) {
     for (const auto &conn : this->connections) {
+        int currLine = line + conn.first, currColumn = column + conn.second;
+        if (not this->isPosValid(currLine, currColumn)) {
+            continue;
+        }
+        if (not this->boardMatrix[currLine][currColumn].restrict) {
+            continue;
+        }
+        if (not this->boardMatrix[currLine][currColumn].restriction.canAddLightBulbs()) {
+            return false;
+        }
+        while (this->isPosValid(currLine, currColumn) && !this->boardMatrix[currLine][currColumn].wall) {
+            if (not this->assertEmpty(currLine, currColumn)) {
+                return false;
+            }
+            currLine += conn.first;
+            currColumn += conn.second;
+        }
+    }
+    return true;
+}
+
+bool Board::assertEmpty(int line, int column) {
+    if (this->boardMatrix[line][column].variable.value == Domain::EMPTY) {
+        return true;
+    }
+    for (const auto &conn : this->connections) {
         int neighborLine = line + conn.first, neighborColumn = column + conn.second;
         if (not this->isPosValid(neighborLine, neighborColumn)) {
             continue;
@@ -49,7 +75,7 @@ bool Board::assertLightBulb(int line, int column) {
         if (not this->boardMatrix[neighborLine][neighborColumn].restrict) {
             continue;
         }
-        if (not this->boardMatrix[neighborLine][neighborColumn].restriction.canAddLightBulbs()) {
+        if (not this->boardMatrix[neighborLine][neighborColumn].restriction.canAddEmpty()) {
             return false;
         }
     }
@@ -99,7 +125,10 @@ void Board::interpretRestrictions() {
             switch (interpretation) {
                 case Domain::EMPTY:
                     for (const auto &pos : n.restriction.squares) {
-                        this->boardMatrix[pos.first][pos.second].variable.value = Domain::EMPTY;
+                        auto affected = this->lightDown(pos.first, pos.second);
+                        if (affected.empty()) {
+                            return;
+                        }
                     }
                     n.restrict = false;
                     break;
@@ -170,8 +199,10 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
             this->boardMatrix[currLine][currColumn].restriction.addLightBulb();
         }
         while (this->isPosValid(currLine, currColumn) && !this->boardMatrix[currLine][currColumn].wall) {
-            this->boardMatrix[currLine][currColumn].variable.value = Domain::EMPTY;
-            affectedVariables.insert(std::pair<int, int>(line, column));
+            auto affectedFromDown = this->lightDown(currLine, currColumn);
+            for (const auto &v : affectedFromDown) {
+                affectedVariables.insert(std::pair<int, int>(v.first, v.second));
+            }
             currLine += conn.first;
             currColumn += conn.second;
         }
@@ -179,11 +210,27 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
     return affectedVariables;
 }
 
-void Board::print() {
-    if (not this->assertViability()) {
-        std::cout << "there is not a solution to the given problem" << std::endl;
-        return;
+std::set<std::pair<int, int> > Board::lightDown(int line, int column) {
+    std::set<std::pair<int, int> > affectedVariables;
+    if (not this->assertEmpty(line, column)) {
+        this->boardMatrix[line][column].variable.value = Domain::IMPOSSIBLE;
+        return affectedVariables;
     }
+    this->boardMatrix[line][column].variable.value = Domain::EMPTY;
+    affectedVariables.insert(std::pair<int, int>(line, column));
+    for (const auto &conn : this->connections) {
+        int neighborLine = line + conn.first, neighborColumn = column + conn.second;
+        if (not this->isPosValid(neighborLine, neighborColumn)) {
+            continue;
+        }
+        if (this->boardMatrix[neighborLine][neighborColumn].restrict) {
+            this->boardMatrix[neighborLine][neighborColumn].restriction.addEmpty();
+        }
+    }
+    return affectedVariables;
+}
+
+void Board::print() {
     for (const auto &row : this->boardMatrix) {
         std::cout << "|";
         for (const auto &n : row) {

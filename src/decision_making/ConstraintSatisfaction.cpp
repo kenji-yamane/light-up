@@ -4,6 +4,7 @@
 
 #include "ConstraintSatisfaction.h"
 
+#include <iostream>
 #include <utility>
 
 namespace decision_making {
@@ -33,26 +34,43 @@ bool ConstraintSatisfaction::solve(State s) {
     }
 
     for (const auto &variable : s.undefinedVariables) {
-        if (not s.board.assertLightBulb(variable.first, variable.second)) {
-            continue;
+        std::vector<State> children;
+        if (s.board.assertLightBulb(variable.first, variable.second)) {
+            children.push_back(decision_making::ConstraintSatisfaction::nextState(s, Light::ON, variable));
         }
-        State next = s;
-        auto affectedVariables = next.board.lightUp(variable.first, variable.second);
-        auto it = next.undefinedVariables.begin();
-        while (it != next.undefinedVariables.end()) {
-            if (affectedVariables.find(std::pair(it->first, it->second)) != affectedVariables.end()) {
-                auto aux = it;
-                std::advance(it, 1);
-                next.undefinedVariables.erase(aux);
-            } else {
-                std::advance(it, 1);
+        if (s.board.assertEmpty(variable.first, variable.second)) {
+            children.push_back(decision_making::ConstraintSatisfaction::nextState(s, Light::OFF, variable));
+        }
+        for (const auto& next : children) {
+            if (this->solve(next)) {
+                return true;
             }
-        }
-        if (this->solve(next)) {
-            return true;
         }
     }
     return false;
+}
+
+State ConstraintSatisfaction::nextState(decision_making::State s, decision_making::Light l, std::pair<int, int> pos) {
+    std::set<std::pair<int, int> > affectedVariables;
+    switch (l) {
+        case Light::ON:
+            affectedVariables = s.board.lightUp(pos.first, pos.second);
+            break;
+        case Light::OFF:
+            affectedVariables = s.board.lightDown(pos.first, pos.second);
+            break;
+    }
+    auto it = s.undefinedVariables.begin();
+    while (it != s.undefinedVariables.end()) {
+        if (affectedVariables.find(std::pair(it->first, it->second)) != affectedVariables.end()) {
+            auto aux = it;
+            std::advance(it, 1);
+            s.undefinedVariables.erase(aux);
+        } else {
+            std::advance(it, 1);
+        }
+    }
+    return s;
 }
 
 }

@@ -7,7 +7,7 @@
 
 namespace modeling {
 
-Restriction::Restriction(int sum) : sum(sum), lightBulbs(0) {}
+Restriction::Restriction(int sum) : sum(sum), lightBulbs(0), empties(0) {}
 
 void Restriction::addSquare(int line, int column) {
     this->squares.emplace_back(line, column);
@@ -35,6 +35,18 @@ bool Restriction::addLightBulb() {
         return false;
     }
     this->lightBulbs++;
+    return true;
+}
+
+bool Restriction::canAddEmpty() const {
+    return ((int)this->squares.size() - this->empties > this->sum);
+}
+
+bool Restriction::addEmpty() {
+    if (not this->canAddEmpty()) {
+        return false;
+    }
+    this->empties++;
     return true;
 }
 

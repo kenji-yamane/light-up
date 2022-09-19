@@ -31,7 +31,9 @@ public:
     std::list<std::pair<int, int> > degreeHeuristic();
     bool assertViability();
     bool assertLightBulb(int line, int column);
+    bool assertEmpty(int line, int column);
     std::set<std::pair<int, int> > lightUp(int line, int column);
+    std::set<std::pair<int, int> > lightDown(int line, int column);
     void print();
 
 private:
