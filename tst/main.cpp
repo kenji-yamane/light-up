@@ -15,6 +15,10 @@ bool testCase(const std::string& game, const std::string& expectedSolution) {
     if (not solvable) {
         return false;
     }
+    if (agent.solution.print() != expectedSolution) {
+        std::cout << agent.solution.print() << std::endl;
+        std::cout << expectedSolution << std::endl;
+    }
     return (agent.solution.print() == expectedSolution);
 }
 

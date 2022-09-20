@@ -23,6 +23,9 @@ public:
     Board();
     explicit Board(int size);
 
+    std::vector<std::pair<int, int> > getNeighbors(int line, int column, std::set<Domain> filter);
+    std::vector<std::pair<int, int> > getVisibleNodes(int line, int column);
+
     void addWall(int line, int column);
     void addNumberedWall(int line, int column, int num);
     void interpretRestrictions();

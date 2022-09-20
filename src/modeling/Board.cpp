@@ -20,6 +20,37 @@ Board::Board(int size) : size(size), lights(0), walls(0) {
     };
 }
 
+std::vector<std::pair<int, int> > Board::getNeighbors(int line, int column, std::set<Domain> filter) {
+    std::vector<std::pair<int, int> > neighbors;
+    for (const auto &conn : this->connections) {
+        int neighborLine = line + conn.first, neighborColumn = column + conn.second;
+        if (not this->isPosValid(neighborLine, neighborColumn)) {
+            continue;
+        }
+        if (filter.find(this->boardMatrix[neighborLine][neighborColumn].variable.value) == filter.end()) {
+            continue;
+        }
+        neighbors.emplace_back(neighborLine, neighborColumn);
+    }
+    return neighbors;
+}
+
+std::vector<std::pair<int, int> > Board::getVisibleNodes(int line, int column) {
+    std::vector<std::pair<int, int> > visibility;
+    for (const auto &conn : this->connections) {
+        int currLine = line + conn.first, currColumn = column + conn.second;
+        while (this->isPosValid(currLine, currColumn)) {
+            if (this->boardMatrix[currLine][currColumn].variable.value == Domain::WALL) {
+                break;
+            }
+            visibility.emplace_back(currLine, currColumn);
+            currLine += conn.first;
+            currColumn += conn.second;
+        }
+    }
+    return visibility;
+}
+
 void Board::addWall(int line, int column) {
     if (not this->isPosValid(line, column)) {
         std::cout << "invalid command, ignoring..." << std::endl;
@@ -45,23 +76,15 @@ void Board::addNumberedWall(int line, int column, int num) {
 }
 
 bool Board::assertLightBulb(int line, int column) {
-    for (const auto &conn : this->connections) {
-        int neighborLine = line + conn.first, neighborColumn = column + conn.second;
-        if (not this->isPosValid(neighborLine, neighborColumn)) {
-            continue;
-        }
-        if (not this->boardMatrix[neighborLine][neighborColumn].restriction.canAddLightBulbs()) {
+    auto nearWalls = this->getNeighbors(line, column, std::set<Domain>{Domain::WALL});
+    for (const auto &wall : nearWalls) {
+        if (not this->boardMatrix[wall.first][wall.second].restriction.canAddLightBulbs()) {
             return false;
         }
     }
-    for (const auto &conn : this->connections) {
-        int currLine = line + conn.first, currColumn = column + conn.second;
-        while (this->isPosValid(currLine, currColumn) && this->boardMatrix[currLine][currColumn].variable.value != Domain::WALL) {
-            if (not this->assertEmpty(currLine, currColumn)) {
-                return false;
-            }
-            currLine += conn.first;
-            currColumn += conn.second;
+    for (const auto &visibleNode : this->getVisibleNodes(line, column)) {
+        if (not this->assertEmpty(visibleNode.first, visibleNode.second)) {
+            return false;
         }
     }
     return true;
@@ -74,12 +97,9 @@ bool Board::assertEmpty(int line, int column) {
     if (this->boardMatrix[line][column].variable.value != Domain::UNDEFINED) {
         return false;
     }
-    for (const auto &conn : this->connections) {
-        int neighborLine = line + conn.first, neighborColumn = column + conn.second;
-        if (not this->isPosValid(neighborLine, neighborColumn)) {
-            continue;
-        }
-        if (not this->boardMatrix[neighborLine][neighborColumn].restriction.canAddEmpty()) {
+    auto nearWalls = this->getNeighbors(line, column, std::set<Domain>{Domain::WALL});
+    for (const auto &wall : nearWalls) {
+        if (not this->boardMatrix[wall.first][wall.second].restriction.canAddEmpty()) {
             return false;
         }
     }
@@ -106,14 +126,12 @@ void Board::interpretRestrictions() {
             if (not this->boardMatrix[line][column].restriction.pending()) {
                 continue;
             }
-            for (const auto &step: connections) {
-                int neighborLine = line + step.first, neighborColumn = column + step.second;
-                if (not this->isPosValid(neighborLine, neighborColumn)) {
-                    continue;
-                }
-                if (this->boardMatrix[neighborLine][neighborColumn].variable.value == Domain::UNDEFINED) {
-                    this->boardMatrix[line][column].restriction.addSquare(neighborLine, neighborColumn);
-                }
+            auto undefinedNeighbors = this->getNeighbors(
+                line, column,
+                std::set<Domain>{Domain::UNDEFINED}
+            );
+            for (const auto &undefined: undefinedNeighbors) {
+                this->boardMatrix[line][column].restriction.addSquare(undefined.first, undefined.second);
             }
         }
     }
@@ -198,23 +216,19 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
     this->boardMatrix[line][column].variable.value = Domain::LIGHT_BULB;
     this->lights++;
     affectedVariables.insert(std::pair<int, int>(line, column));
-    for (const auto &conn : this->connections) {
-        int currLine = line + conn.first, currColumn = column + conn.second;
-        if (not this->isPosValid(currLine, currColumn)) {
-            continue;
+    auto nearWalls = this->getNeighbors(line, column, std::set<Domain>{Domain::WALL});
+    for (const auto &wall : nearWalls) {
+        this->boardMatrix[wall.first][wall.second].restriction.addLightBulb();
+    }
+    for (const auto &visibleNode : this->getVisibleNodes(line, column)) {
+        this->boardMatrix[visibleNode.first][visibleNode.second].restriction.addLightBulb();
+        if (not this->boardMatrix[visibleNode.first][visibleNode.second].variable.enlightened) {
+            this->boardMatrix[visibleNode.first][visibleNode.second].variable.enlightened = true;
+            this->lights++;
         }
-        this->boardMatrix[currLine][currColumn].restriction.addLightBulb();
-        while (this->isPosValid(currLine, currColumn) && this->boardMatrix[currLine][currColumn].variable.value != Domain::WALL) {
-            if (not this->boardMatrix[currLine][currColumn].variable.enlightened) {
-                this->boardMatrix[currLine][currColumn].variable.enlightened = true;
-                this->lights++;
-            }
-            auto affectedFromDown = this->lightDown(currLine, currColumn);
-            for (const auto &v : affectedFromDown) {
-                affectedVariables.insert(std::pair<int, int>(v.first, v.second));
-            }
-            currLine += conn.first;
-            currColumn += conn.second;
+        auto affectedFromDown = this->lightDown(visibleNode.first, visibleNode.second);
+        for (const auto &v : affectedFromDown) {
+            affectedVariables.insert(std::pair<int, int>(v.first, v.second));
         }
     }
     return affectedVariables;
@@ -231,12 +245,9 @@ std::set<std::pair<int, int> > Board::lightDown(int line, int column) {
     }
     this->boardMatrix[line][column].variable.value = Domain::EMPTY;
     affectedVariables.insert(std::pair<int, int>(line, column));
-    for (const auto &conn : this->connections) {
-        int neighborLine = line + conn.first, neighborColumn = column + conn.second;
-        if (not this->isPosValid(neighborLine, neighborColumn)) {
-            continue;
-        }
-        this->boardMatrix[neighborLine][neighborColumn].restriction.addEmpty();
+    auto nearWalls = this->getNeighbors(line, column, std::set<Domain>{Domain::WALL});
+    for (const auto &wall : nearWalls) {
+        this->boardMatrix[wall.first][wall.second].restriction.addEmpty();
     }
     return affectedVariables;
 }

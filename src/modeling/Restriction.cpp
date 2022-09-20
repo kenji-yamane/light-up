@@ -6,9 +6,9 @@
 
 namespace modeling {
 
-Restriction::Restriction() : sum(0), lightBulbs(0), empties(0), enabled(false), satisfied(false) {}
+Restriction::Restriction() : squares(), sum(0), lightBulbs(0), empties(0), enabled(false), satisfied(false) {}
 
-Restriction::Restriction(int sum) : sum(sum), lightBulbs(0), empties(0), enabled(true), satisfied(false) {}
+Restriction::Restriction(int sum) : squares(), sum(sum), lightBulbs(0), empties(0), enabled(true), satisfied(false) {}
 
 void Restriction::addSquare(int line, int column) {
     this->squares.emplace_back(line, column);
