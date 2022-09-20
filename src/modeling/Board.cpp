@@ -154,7 +154,7 @@ void Board::interpretRestrictions() {
     }
 }
 
-std::list<std::pair<int, int> > Board::degreeHeuristic() {
+std::list<std::pair<int, int> > Board::getUndefinedVariables() {
     for (const auto &row : this->boardMatrix) {
         for (const auto &n : row) {
             if (not n.restriction.pending()) {

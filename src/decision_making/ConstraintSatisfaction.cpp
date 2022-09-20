@@ -19,7 +19,7 @@ bool ConstraintSatisfaction::solve() {
     if (not this->initialBoard.assertViability()) {
         return false;
     }
-    auto undefinedVariables = this->initialBoard.degreeHeuristic();
+    auto undefinedVariables = this->initialBoard.getUndefinedVariables();
     if (this->solve(State{undefinedVariables, this->initialBoard})) {
         return true;
     }

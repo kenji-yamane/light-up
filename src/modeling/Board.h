@@ -28,7 +28,7 @@ public:
     void addWall(int line, int column);
     void addNumberedWall(int line, int column, int num);
     void interpretRestrictions();
-    std::list<std::pair<int, int> > degreeHeuristic();
+    std::list<std::pair<int, int> > getUndefinedVariables();
     bool assertViability();
     bool assertLightBulb(int line, int column);
     bool assertEmpty(int line, int column);
