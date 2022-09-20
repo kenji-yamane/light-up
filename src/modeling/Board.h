@@ -13,16 +13,14 @@
 
 namespace modeling {
 
-struct Node {
-    Variable variable;
-    Restriction restriction;
-};
-
 class Board {
 public:
     Board();
     explicit Board(int size);
 
+    std::vector<std::pair<int, int> > getAllNodes();
+    std::vector<std::pair<int, int> > getUndefinedNeighbors(int line, int column);
+    std::vector<std::pair<int, int> > getWallNeighbors(int line, int column);
     std::vector<std::pair<int, int> > getNeighbors(int line, int column, std::set<Domain> filter);
     std::vector<std::pair<int, int> > getVisibleNodes(int line, int column);
 
@@ -45,7 +43,8 @@ private:
     int size;
     int lights;
     int walls;
-    std::vector<std::vector<Node> > boardMatrix;
+    std::vector<std::vector<Variable> > variableMatrix;
+    std::vector<std::vector<Restriction> > restrictionMatrix;
     std::vector<std::pair<int, int> > connections;
 };
 

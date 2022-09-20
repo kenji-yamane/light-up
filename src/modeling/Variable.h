@@ -20,20 +20,17 @@ enum class Domain {
 
 class Variable {
 public:
-    Variable(int line, int column);
+    Variable();
 
     [[nodiscard]] char prettyDomain() const;
 
     Domain value;
     int restrictions;
     bool enlightened;
-    int line, column;
 
 private:
     static std::map<Domain, char> domainToAscii;
 };
-
-bool compareVariables(Variable a, Variable b);
 
 }
 
