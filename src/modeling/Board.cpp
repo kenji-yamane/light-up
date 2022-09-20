@@ -39,16 +39,12 @@ void Board::addNumberedWall(int line, int column, int num) {
 
     this->addWall(line, column);
     this->boardMatrix[line][column].restriction = Restriction(num);
-    this->boardMatrix[line][column].restrict = true;
 }
 
 bool Board::assertLightBulb(int line, int column) {
     for (const auto &conn : this->connections) {
         int neighborLine = line + conn.first, neighborColumn = column + conn.second;
         if (not this->isPosValid(neighborLine, neighborColumn)) {
-            continue;
-        }
-        if (not this->boardMatrix[neighborLine][neighborColumn].restrict) {
             continue;
         }
         if (not this->boardMatrix[neighborLine][neighborColumn].restriction.canAddLightBulbs()) {
@@ -80,9 +76,6 @@ bool Board::assertEmpty(int line, int column) {
         if (not this->isPosValid(neighborLine, neighborColumn)) {
             continue;
         }
-        if (not this->boardMatrix[neighborLine][neighborColumn].restrict) {
-            continue;
-        }
         if (not this->boardMatrix[neighborLine][neighborColumn].restriction.canAddEmpty()) {
             return false;
         }
@@ -97,7 +90,7 @@ void Board::initializeBoard() {
         for (int j = 0; j < this->size; j++) {
             nodeRow.push_back(Node{
                 Variable(i, j),
-                Restriction(0),
+                Restriction(),
                 false,
                 false
             });
@@ -109,7 +102,7 @@ void Board::initializeBoard() {
 void Board::interpretRestrictions() {
     for (int line = 0; line < (int)this->boardMatrix.size(); line++) {
         for (int column = 0; column < (int)this->boardMatrix[line].size(); column++) {
-            if (not this->boardMatrix[line][column].restrict) {
+            if (not this->boardMatrix[line][column].restriction.pending()) {
                 continue;
             }
             for (const auto &step: connections) {
@@ -126,7 +119,7 @@ void Board::interpretRestrictions() {
 
     for (auto &row : this->boardMatrix) {
         for (auto &n : row) {
-            if (not n.restrict) {
+            if (not n.restriction.pending()) {
                 continue;
             }
             Domain interpretation = n.restriction.interpret();
@@ -138,7 +131,7 @@ void Board::interpretRestrictions() {
                             return;
                         }
                     }
-                    n.restrict = false;
+                    n.restriction.satisfy();
                     break;
                 case Domain::LIGHT_BULB:
                     for (const auto &pos : n.restriction.squares) {
@@ -147,7 +140,7 @@ void Board::interpretRestrictions() {
                             return;
                         }
                     }
-                    n.restrict = false;
+                    n.restriction.satisfy();
                     break;
                 case Domain::IMPOSSIBLE:
                     for (const auto &pos : n.restriction.squares) {
@@ -164,11 +157,11 @@ void Board::interpretRestrictions() {
 std::list<std::pair<int, int> > Board::degreeHeuristic() {
     for (const auto &row : this->boardMatrix) {
         for (const auto &n : row) {
-            if (not n.restrict) {
+            if (not n.restriction.pending()) {
                 continue;
             }
             for (const auto &square : n.restriction.squares) {
-                this->boardMatrix[square.first][square.second].variable.restrictionsCount++;
+                this->boardMatrix[square.first][square.second].variable.restrictions++;
             }
         }
     }
@@ -208,9 +201,7 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
         if (not this->isPosValid(currLine, currColumn)) {
             continue;
         }
-        if (this->boardMatrix[currLine][currColumn].restrict) {
-            this->boardMatrix[currLine][currColumn].restriction.addLightBulb();
-        }
+        this->boardMatrix[currLine][currColumn].restriction.addLightBulb();
         while (this->isPosValid(currLine, currColumn) && !this->boardMatrix[currLine][currColumn].wall) {
             if (not this->boardMatrix[currLine][currColumn].enlightened) {
                 this->boardMatrix[currLine][currColumn].enlightened = true;
@@ -243,9 +234,7 @@ std::set<std::pair<int, int> > Board::lightDown(int line, int column) {
         if (not this->isPosValid(neighborLine, neighborColumn)) {
             continue;
         }
-        if (this->boardMatrix[neighborLine][neighborColumn].restrict) {
-            this->boardMatrix[neighborLine][neighborColumn].restriction.addEmpty();
-        }
+        this->boardMatrix[neighborLine][neighborColumn].restriction.addEmpty();
     }
     return affectedVariables;
 }
@@ -255,7 +244,7 @@ std::string Board::print() {
     for (const auto &row : this->boardMatrix) {
         out << "|";
         for (const auto &n : row) {
-            if (n.restrict) {
+            if (n.restriction.exists()) {
                 out << n.restriction.prettyRestriction() << "|";
             } else if (n.wall) {
                 out << "-" << "|";

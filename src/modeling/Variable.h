@@ -24,7 +24,7 @@ public:
     [[nodiscard]] char prettyDomain() const;
 
     Domain value;
-    int restrictionsCount;
+    int restrictions;
     int line, column;
 
 private:

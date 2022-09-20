@@ -17,7 +17,6 @@ struct Node {
     Variable variable;
     Restriction restriction;
     bool wall{};
-    bool restrict{};
     bool enlightened{};
 };
 

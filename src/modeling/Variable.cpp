@@ -22,7 +22,7 @@ char Variable::prettyDomain() const {
 }
 
 bool compareVariables(Variable a, Variable b) {
-    return (a.restrictionsCount > b.restrictionsCount);
+    return (a.restrictions > b.restrictions);
 }
 
 }

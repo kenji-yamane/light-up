@@ -6,7 +6,9 @@
 
 namespace modeling {
 
-Restriction::Restriction(int sum) : sum(sum), lightBulbs(0), empties(0) {}
+Restriction::Restriction() : sum(0), lightBulbs(0), empties(0), enabled(false), satisfied(false) {}
+
+Restriction::Restriction(int sum) : sum(sum), lightBulbs(0), empties(0), enabled(true), satisfied(false) {}
 
 void Restriction::addSquare(int line, int column) {
     this->squares.emplace_back(line, column);
@@ -26,10 +28,16 @@ Domain Restriction::interpret() const {
 }
 
 bool Restriction::canAddLightBulbs() const {
+    if (not this->enabled) {
+        return true;
+    }
     return (this->lightBulbs < this->sum);
 }
 
 bool Restriction::addLightBulb() {
+    if (not this->enabled) {
+        return true;
+    }
     if (not this->canAddLightBulbs()) {
         return false;
     }
@@ -38,10 +46,16 @@ bool Restriction::addLightBulb() {
 }
 
 bool Restriction::canAddEmpty() const {
+    if (not this->enabled) {
+        return true;
+    }
     return ((int)this->squares.size() - this->empties > this->sum);
 }
 
 bool Restriction::addEmpty() {
+    if (not this->enabled) {
+        return true;
+    }
     if (not this->canAddEmpty()) {
         return false;
     }
@@ -51,6 +65,18 @@ bool Restriction::addEmpty() {
 
 char Restriction::prettyRestriction() const {
     return (char)(this->sum + '0');
+}
+
+bool Restriction::exists() const {
+    return this->enabled;
+}
+
+void Restriction::satisfy() {
+    this->satisfied = true;
+}
+
+bool Restriction::pending() const {
+    return (this->enabled and not this->satisfied);
 }
 
 }
