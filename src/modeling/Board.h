@@ -36,7 +36,7 @@ public:
     [[nodiscard]] bool enlightened() const;
     std::set<std::pair<int, int> > lightUp(int line, int column);
     std::set<std::pair<int, int> > lightDown(int line, int column);
-    void print();
+    std::string print();
 
 private:
     void initializeBoard();

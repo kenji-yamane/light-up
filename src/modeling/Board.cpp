@@ -5,6 +5,7 @@
 #include "Board.h"
 
 #include <iostream>
+#include <sstream>
 #include <algorithm>
 
 namespace modeling {
@@ -249,20 +250,22 @@ std::set<std::pair<int, int> > Board::lightDown(int line, int column) {
     return affectedVariables;
 }
 
-void Board::print() {
+std::string Board::print() {
+    std::stringstream out;
     for (const auto &row : this->boardMatrix) {
-        std::cout << "|";
+        out << "|";
         for (const auto &n : row) {
             if (n.restrict) {
-                std::cout << n.restriction.prettyRestriction() << "|";
+                out << n.restriction.prettyRestriction() << "|";
             } else if (n.wall) {
-                std::cout << "-" << "|";
+                out << "-" << "|";
             } else {
-                std::cout << n.variable.prettyDomain() << "|";
+                out << n.variable.prettyDomain() << "|";
             }
         }
-        std::cout << std::endl;
+        out << std::endl;
     }
+    return out.str();
 }
 
 bool Board::assertViability() {

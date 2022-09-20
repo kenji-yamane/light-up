@@ -35,4 +35,5 @@ bin/*
 
 # CLion metadata
 cmake-build-debug/
+build/
 .idea/

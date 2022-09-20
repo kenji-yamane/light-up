@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
         std::cout << "no solution was found" << std::endl;
         return 0;
     }
-    agent.solution.print();
+    std::string solution = agent.solution.print();
+    std::cout << solution;
     return 0;
 }
