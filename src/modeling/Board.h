@@ -16,8 +16,6 @@ namespace modeling {
 struct Node {
     Variable variable;
     Restriction restriction;
-    bool wall{};
-    bool enlightened{};
 };
 
 class Board {

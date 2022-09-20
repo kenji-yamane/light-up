@@ -27,13 +27,16 @@ void Board::addWall(int line, int column) {
     }
 
     this->walls++;
-    this->boardMatrix[line][column].variable.value = Domain::EMPTY;
-    this->boardMatrix[line][column].wall = true;
+    this->boardMatrix[line][column].variable.value = Domain::WALL;
 }
 
 void Board::addNumberedWall(int line, int column, int num) {
-    if (not this->isPosValid(line, column) || this->boardMatrix[line][column].wall || num < 0) {
+    if (not this->isPosValid(line, column) || this->boardMatrix[line][column].variable.value == Domain::WALL || num < 0) {
         std::cout << "invalid command, ignoring..." << std::endl;
+        return;
+    }
+    if (this->boardMatrix[line][column].variable.value != Domain::UNDEFINED) {
+        std::cout << "board is inconsistent, exiting..." << std::endl;
         return;
     }
 
@@ -53,7 +56,7 @@ bool Board::assertLightBulb(int line, int column) {
     }
     for (const auto &conn : this->connections) {
         int currLine = line + conn.first, currColumn = column + conn.second;
-        while (this->isPosValid(currLine, currColumn) && !this->boardMatrix[currLine][currColumn].wall) {
+        while (this->isPosValid(currLine, currColumn) && this->boardMatrix[currLine][currColumn].variable.value != Domain::WALL) {
             if (not this->assertEmpty(currLine, currColumn)) {
                 return false;
             }
@@ -90,9 +93,7 @@ void Board::initializeBoard() {
         for (int j = 0; j < this->size; j++) {
             nodeRow.push_back(Node{
                 Variable(i, j),
-                Restriction(),
-                false,
-                false
+                Restriction()
             });
         }
         this->boardMatrix.push_back(nodeRow);
@@ -148,6 +149,7 @@ void Board::interpretRestrictions() {
                     }
                     return;
                 case Domain::UNDEFINED:
+                case Domain::WALL:
                     break;
             }
         }
@@ -202,9 +204,9 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
             continue;
         }
         this->boardMatrix[currLine][currColumn].restriction.addLightBulb();
-        while (this->isPosValid(currLine, currColumn) && !this->boardMatrix[currLine][currColumn].wall) {
-            if (not this->boardMatrix[currLine][currColumn].enlightened) {
-                this->boardMatrix[currLine][currColumn].enlightened = true;
+        while (this->isPosValid(currLine, currColumn) && this->boardMatrix[currLine][currColumn].variable.value != Domain::WALL) {
+            if (not this->boardMatrix[currLine][currColumn].variable.enlightened) {
+                this->boardMatrix[currLine][currColumn].variable.enlightened = true;
                 this->lights++;
             }
             auto affectedFromDown = this->lightDown(currLine, currColumn);
@@ -246,8 +248,6 @@ std::string Board::print() {
         for (const auto &n : row) {
             if (n.restriction.exists()) {
                 out << n.restriction.prettyRestriction() << "|";
-            } else if (n.wall) {
-                out << "-" << "|";
             } else {
                 out << n.variable.prettyDomain() << "|";
             }

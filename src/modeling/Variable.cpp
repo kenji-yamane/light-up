@@ -11,9 +11,10 @@ std::map<Domain, char> Variable::domainToAscii = std::map<Domain, char>{
     {Domain::IMPOSSIBLE, 'X'},
     {Domain::LIGHT_BULB, 'L'},
     {Domain::UNDEFINED, '?'},
+    {Domain::WALL, '-'}
 };
 
-Variable::Variable(int line, int column) : line(line), column(column) {
+Variable::Variable(int line, int column) : restrictions(0), enlightened(false), line(line), column(column) {
     this->value = Domain::UNDEFINED;
 }
 

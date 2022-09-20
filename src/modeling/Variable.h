@@ -14,7 +14,8 @@ enum class Domain {
     LIGHT_BULB,
     EMPTY,
     UNDEFINED,
-    IMPOSSIBLE
+    IMPOSSIBLE,
+    WALL
 };
 
 class Variable {
@@ -25,6 +26,7 @@ public:
 
     Domain value;
     int restrictions;
+    bool enlightened;
     int line, column;
 
 private:
