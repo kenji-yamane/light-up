@@ -1,18 +1,15 @@
 #include <iostream>
 
-#include "modeling/Board.h"
+#include "parser/parser.h"
 #include "decision_making/ConstraintSatisfaction.h"
 
-int main() {
-    modeling::Board board(7);
-    board.addWall(0, 4);
-    board.addNumberedWall(1, 3, 3);
-    board.addNumberedWall(2, 0, 0);
-    board.addNumberedWall(3, 1, 1);
-    board.addWall(3, 5);
-    board.addNumberedWall(4, 6, 3);
-    board.addWall(5, 3);
-    board.addNumberedWall(6, 2, 2);
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        std::cout << "usage: provide the name of the file containing the game" << std::endl;
+        std::cout << "./agent <name-of-the-file>" << std::endl;
+        return 1;
+    }
+    modeling::Board board = parser::fromFile(std::string(argv[1]));
 
     decision_making::ConstraintSatisfaction agent(board);
     bool solvable = agent.solve();

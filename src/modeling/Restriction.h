@@ -22,6 +22,7 @@ public:
     bool addLightBulb();
     [[nodiscard]] bool canAddEmpty() const;
     bool addEmpty();
+    [[nodiscard]] char prettyRestriction() const;
 
     std::vector<std::pair<int, int> > squares;
 

@@ -253,7 +253,9 @@ void Board::print() {
     for (const auto &row : this->boardMatrix) {
         std::cout << "|";
         for (const auto &n : row) {
-            if (n.wall) {
+            if (n.restrict) {
+                std::cout << n.restriction.prettyRestriction() << "|";
+            } else if (n.wall) {
                 std::cout << "-" << "|";
             } else {
                 std::cout << n.variable.prettyDomain() << "|";

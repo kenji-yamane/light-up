@@ -3,7 +3,6 @@
 //
 
 #include "Restriction.h"
-#include <iostream>
 
 namespace modeling {
 
@@ -48,6 +47,10 @@ bool Restriction::addEmpty() {
     }
     this->empties++;
     return true;
+}
+
+char Restriction::prettyRestriction() const {
+    return (char)(this->sum + '0');
 }
 
 }
