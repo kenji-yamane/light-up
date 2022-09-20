@@ -26,7 +26,7 @@ bool ConstraintSatisfaction::solve() {
     return false;
 }
 
-bool ConstraintSatisfaction::solve(State s) {
+bool ConstraintSatisfaction::solve(const State& s) {
     this->nodesVisited++;
     if (s.undefinedVariables.empty()) {
         this->solution = s.board;

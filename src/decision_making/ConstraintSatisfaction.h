@@ -23,7 +23,7 @@ public:
     int nodesVisited;
 
 private:
-    bool solve(State s);
+    bool solve(const State& s);
 
     modeling::Board initialBoard;
 };
