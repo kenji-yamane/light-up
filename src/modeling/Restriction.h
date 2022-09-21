@@ -17,25 +17,25 @@ class Restriction {
 public:
     Restriction();
     explicit Restriction(int sum);
-    void addSquares(int num);
+
     [[nodiscard]] Domain interpret() const;
+
     [[nodiscard]] bool canAddLightBulbs() const;
     bool addLightBulb();
     [[nodiscard]] bool canAddEmpty() const;
     bool addEmpty();
-    [[nodiscard]] char prettyRestriction() const;
+    void addSquares(int num);
+
     [[nodiscard]] bool exists() const;
     [[nodiscard]] bool pending() const;
+
+    [[nodiscard]] char prettyRestriction() const;
 
 private:
     void checkIfSatisfied();
 
-    int sum;
-    int lightBulbs;
-    int empties;
-    int squares;
-    bool enabled;
-    bool satisfied;
+    int sum, lightBulbs, empties, squares;
+    bool enabled, satisfied;
 };
 
 }

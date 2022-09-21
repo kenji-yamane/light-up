@@ -10,10 +10,6 @@ Restriction::Restriction() : sum(0), lightBulbs(0), empties(0), squares(0), enab
 
 Restriction::Restriction(int sum) : sum(sum), lightBulbs(0), empties(0), squares(0), enabled(true), satisfied(false) {}
 
-void Restriction::addSquares(int num) {
-    this->squares += num;
-}
-
 Domain Restriction::interpret() const {
     if (this->sum == 0) {
         return Domain::EMPTY;
@@ -65,8 +61,8 @@ bool Restriction::addEmpty() {
     return true;
 }
 
-char Restriction::prettyRestriction() const {
-    return (char)(this->sum + '0');
+void Restriction::addSquares(int num) {
+    this->squares += num;
 }
 
 bool Restriction::exists() const {
@@ -75,6 +71,10 @@ bool Restriction::exists() const {
 
 bool Restriction::pending() const {
     return (this->enabled and not this->satisfied);
+}
+
+char Restriction::prettyRestriction() const {
+    return (char)(this->sum + '0');
 }
 
 void Restriction::checkIfSatisfied() {
