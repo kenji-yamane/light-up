@@ -25,10 +25,11 @@ public:
     bool addEmpty();
     [[nodiscard]] char prettyRestriction() const;
     [[nodiscard]] bool exists() const;
-    void satisfy();
     [[nodiscard]] bool pending() const;
 
 private:
+    void checkIfSatisfied();
+
     int sum;
     int lightBulbs;
     int empties;

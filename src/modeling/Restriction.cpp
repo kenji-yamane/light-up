@@ -42,6 +42,7 @@ bool Restriction::addLightBulb() {
         return false;
     }
     this->lightBulbs++;
+    this->checkIfSatisfied();
     return true;
 }
 
@@ -60,6 +61,7 @@ bool Restriction::addEmpty() {
         return false;
     }
     this->empties++;
+    this->checkIfSatisfied();
     return true;
 }
 
@@ -71,12 +73,16 @@ bool Restriction::exists() const {
     return this->enabled;
 }
 
-void Restriction::satisfy() {
-    this->satisfied = true;
-}
-
 bool Restriction::pending() const {
     return (this->enabled and not this->satisfied);
+}
+
+void Restriction::checkIfSatisfied() {
+    if (this->sum == 0) {
+        this->satisfied = (this->squares == this->empties);
+    } else {
+        this->satisfied = (this->sum == this->lightBulbs);
+    }
 }
 
 }

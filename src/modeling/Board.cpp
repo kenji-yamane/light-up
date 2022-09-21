@@ -20,6 +20,15 @@ Board::Board(int size) : size(size), lights(0), walls(0), impossible(false) {
     };
 }
 
+void Board::initializeBoard() {
+    this->variableMatrix = std::vector<std::vector<Variable> >(
+        this->size,std::vector<Variable>(this->size, Variable())
+    );
+    this->restrictionMatrix = std::vector<std::vector<Restriction> >(
+        this->size,std::vector<Restriction>(this->size, Restriction())
+    );
+}
+
 std::vector<std::pair<int, int> > Board::getAllNodes() {
     std::vector<std::pair<int, int> > nodes;
     for (int line = 0; line < (int)this->restrictionMatrix.size(); line++) {
@@ -86,17 +95,12 @@ void Board::addNumberedWall(int line, int column, int num) {
     }
     if (this->variableMatrix[line][column].value != Domain::UNDEFINED) {
         std::cout << "board is inconsistent, exiting..." << std::endl;
-        return;
+        exit(0);
     }
 
     this->addWall(line, column);
     this->restrictionMatrix[line][column] = Restriction(num);
     this->restrictionMatrix[line][column].addSquares((int)this->getUndefinedNeighbors(line, column).size());
-}
-
-void Board::initializeBoard() {
-    this->variableMatrix = std::vector<std::vector<Variable> >(this->size,std::vector<Variable>(this->size, Variable()));
-    this->restrictionMatrix = std::vector<std::vector<Restriction> >(this->size,std::vector<Restriction>(this->size, Restriction()));
 }
 
 void Board::interpretRestrictions() {
@@ -108,16 +112,18 @@ void Board::interpretRestrictions() {
         std::set<Domain> restrictionRange = std::set<Domain>{Domain::EMPTY, Domain::LIGHT_BULB, Domain::UNDEFINED};
         switch (interpretation) {
             case Domain::EMPTY:
-                for (const auto &neighbor : this->getNeighbors(node.first, node.second, restrictionRange)) {
+                for (const auto &neighbor : this->getNeighbors(
+                    node.first, node.second, restrictionRange)
+                ) {
                     this->lightDown(neighbor.first, neighbor.second);
                 }
-                restrictionMatrix[node.first][node.second].satisfy();
                 break;
             case Domain::LIGHT_BULB:
-                for (const auto &neighbor : this->getNeighbors(node.first, node.second, restrictionRange)) {
+                for (const auto &neighbor : this->getNeighbors(
+                    node.first, node.second, restrictionRange)
+                ) {
                     this->lightUp(neighbor.first, neighbor.second);
                 }
-                restrictionMatrix[node.first][node.second].satisfy();
                 break;
             case Domain::IMPOSSIBLE:
                 this->giveUp(node.first, node.second);
@@ -136,7 +142,10 @@ std::list<std::pair<int, int> > Board::getUndefinedVariables() {
     std::vector<std::pair<int, std::pair<int, int> > > undefinedVariables;
     for (const auto &node : this->getAllNodes()) {
         if (this->variableMatrix[node.first][node.second].value == Domain::UNDEFINED) {
-            undefinedVariables.emplace_back(this->variableMatrix[node.first][node.second].restrictions,std::make_pair(node.first, node.second));
+            undefinedVariables.emplace_back(
+                this->variableMatrix[node.first][node.second].restrictions,
+                std::make_pair(node.first, node.second)
+            );
         }
     }
     std::sort(undefinedVariables.begin(), undefinedVariables.end(), std::greater<>());
@@ -148,15 +157,8 @@ std::list<std::pair<int, int> > Board::getUndefinedVariables() {
     return prioritized;
 }
 
-bool Board::enlightened() const {
-    return (this->lights + this->walls == this->size*this->size);
-}
-
 std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
     std::set<std::pair<int, int> > affectedVariables;
-    this->variableMatrix[line][column].value = Domain::LIGHT_BULB;
-    this->lights++;
-    affectedVariables.insert(std::pair<int, int>(line, column));
     for (const auto &wall : this->getWallNeighbors(line, column)) {
         if (not this->restrictionMatrix[wall.first][wall.second].addLightBulb()) {
             this->giveUp(line, column);
@@ -164,7 +166,6 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
         }
     }
     for (const auto &visibleNode : this->getVisibleNodes(line, column)) {
-        this->restrictionMatrix[visibleNode.first][visibleNode.second].addLightBulb();
         if (not this->variableMatrix[visibleNode.first][visibleNode.second].enlightened) {
             this->variableMatrix[visibleNode.first][visibleNode.second].enlightened = true;
             this->lights++;
@@ -174,6 +175,9 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
             affectedVariables.insert(std::pair<int, int>(v.first, v.second));
         }
     }
+    this->variableMatrix[line][column].value = Domain::LIGHT_BULB;
+    affectedVariables.insert(std::pair<int, int>(line, column));
+    this->lights++;
     return affectedVariables;
 }
 
@@ -184,13 +188,11 @@ std::set<std::pair<int, int> > Board::lightDown(int line, int column) {
     }
     if (this->variableMatrix[line][column].value != Domain::UNDEFINED) {
         this->giveUp(line, column);
-        this->variableMatrix[line][column].value = Domain::IMPOSSIBLE;
         return affectedVariables;
     }
     for (const auto &wall : this->getWallNeighbors(line, column)) {
         if (not this->restrictionMatrix[wall.first][wall.second].addEmpty()) {
             this->giveUp(line, column);
-            this->variableMatrix[line][column].value = Domain::IMPOSSIBLE;
             return affectedVariables;
         }
     }
@@ -215,13 +217,17 @@ std::string Board::print() {
     return out.str();
 }
 
-void Board::giveUp(int line, int column) {
-    this->variableMatrix[line][column].value = Domain::IMPOSSIBLE;
-    this->impossible = true;
+bool Board::enlightened() const {
+    return (this->lights + this->walls == this->size*this->size);
 }
 
 bool Board::assertViability() const {
     return not impossible;
+}
+
+void Board::giveUp(int line, int column) {
+    this->variableMatrix[line][column].value = Domain::IMPOSSIBLE;
+    this->impossible = true;
 }
 
 bool Board::isPosValid(int line, int column) const {
