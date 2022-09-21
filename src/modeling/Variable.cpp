@@ -14,8 +14,24 @@ std::map<Domain, char> Variable::domainToAscii = std::map<Domain, char>{
     {Domain::WALL, '-'}
 };
 
-Variable::Variable() : restrictions(0), enlightened(false) {
+Variable::Variable() : restrictions(0), light(false) {
     this->value = Domain::UNDEFINED;
+}
+
+void Variable::lightUp() {
+    this->light = true;
+}
+
+bool Variable::lit() const {
+    return this->light;
+}
+
+void Variable::addRestriction() {
+    this->restrictions++;
+}
+
+int Variable::countRestrictions() const {
+    return this->restrictions;
 }
 
 char Variable::prettyDomain() const {

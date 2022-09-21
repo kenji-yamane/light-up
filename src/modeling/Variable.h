@@ -22,14 +22,21 @@ class Variable {
 public:
     Variable();
 
+    void lightUp();
+    [[nodiscard]] bool lit() const;
+
+    void addRestriction();
+    [[nodiscard]] int countRestrictions() const;
+
     [[nodiscard]] char prettyDomain() const;
 
     Domain value;
-    int restrictions;
-    bool enlightened;
 
 private:
     static std::map<Domain, char> domainToAscii;
+
+    int restrictions;
+    bool light;
 };
 
 }

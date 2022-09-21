@@ -130,7 +130,7 @@ void Board::interpretRestrictions() {
                 return;
             case Domain::UNDEFINED:
                 for (const auto &undefined : this->getUndefinedNeighbors(node.first, node.second)) {
-                    this->variableMatrix[undefined.first][undefined.second].restrictions++;
+                    this->variableMatrix[undefined.first][undefined.second].addRestriction();
                 }
             case Domain::WALL:
                 break;
@@ -143,7 +143,7 @@ std::list<std::pair<int, int> > Board::getUndefinedVariables() {
     for (const auto &node : this->getAllNodes()) {
         if (this->variableMatrix[node.first][node.second].value == Domain::UNDEFINED) {
             undefinedVariables.emplace_back(
-                this->variableMatrix[node.first][node.second].restrictions,
+                this->variableMatrix[node.first][node.second].countRestrictions(),
                 std::make_pair(node.first, node.second)
             );
         }
@@ -166,8 +166,8 @@ std::set<std::pair<int, int> > Board::lightUp(int line, int column) {
         }
     }
     for (const auto &visibleNode : this->getVisibleNodes(line, column)) {
-        if (not this->variableMatrix[visibleNode.first][visibleNode.second].enlightened) {
-            this->variableMatrix[visibleNode.first][visibleNode.second].enlightened = true;
+        if (not this->variableMatrix[visibleNode.first][visibleNode.second].lit()) {
+            this->variableMatrix[visibleNode.first][visibleNode.second].lightUp();
             this->lights++;
         }
         auto affectedFromDown = this->lightDown(visibleNode.first, visibleNode.second);
