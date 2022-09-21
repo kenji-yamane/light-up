@@ -6,22 +6,22 @@
 
 namespace modeling {
 
-Restriction::Restriction() : squares(), sum(0), lightBulbs(0), empties(0), enabled(false), satisfied(false) {}
+Restriction::Restriction() : sum(0), lightBulbs(0), empties(0), squares(0), enabled(false), satisfied(false) {}
 
-Restriction::Restriction(int sum) : squares(), sum(sum), lightBulbs(0), empties(0), enabled(true), satisfied(false) {}
+Restriction::Restriction(int sum) : sum(sum), lightBulbs(0), empties(0), squares(0), enabled(true), satisfied(false) {}
 
-void Restriction::addSquare(int line, int column) {
-    this->squares.emplace_back(line, column);
+void Restriction::addSquares(int num) {
+    this->squares += num;
 }
 
 Domain Restriction::interpret() const {
     if (this->sum == 0) {
         return Domain::EMPTY;
     }
-    if (this->sum > (int)this->squares.size()) {
+    if (this->sum > (int)this->squares) {
         return Domain::IMPOSSIBLE;
     }
-    if (this->sum == (int)this->squares.size()) {
+    if (this->sum == (int)this->squares) {
         return Domain::LIGHT_BULB;
     }
     return Domain::UNDEFINED;
@@ -49,7 +49,7 @@ bool Restriction::canAddEmpty() const {
     if (not this->enabled) {
         return true;
     }
-    return ((int)this->squares.size() - this->empties > this->sum);
+    return ((int)this->squares - this->empties > this->sum);
 }
 
 bool Restriction::addEmpty() {

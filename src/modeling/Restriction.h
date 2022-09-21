@@ -17,7 +17,7 @@ class Restriction {
 public:
     Restriction();
     explicit Restriction(int sum);
-    void addSquare(int line, int column);
+    void addSquares(int num);
     [[nodiscard]] Domain interpret() const;
     [[nodiscard]] bool canAddLightBulbs() const;
     bool addLightBulb();
@@ -28,12 +28,11 @@ public:
     void satisfy();
     [[nodiscard]] bool pending() const;
 
-    std::vector<std::pair<int, int> > squares;
-
 private:
     int sum;
     int lightBulbs;
     int empties;
+    int squares;
     bool enabled;
     bool satisfied;
 };
