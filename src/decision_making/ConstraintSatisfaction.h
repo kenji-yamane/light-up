@@ -5,14 +5,9 @@
 #ifndef LIGHT_UP_AGENT_CONSTRAINTSATISFACTION_H
 #define LIGHT_UP_AGENT_CONSTRAINTSATISFACTION_H
 
-#include "modeling/Board.h"
+#include "decision_making/State.h"
 
 namespace decision_making {
-
-struct State {
-    std::list<std::pair<int, int> > undefinedVariables;
-    modeling::Board board;
-};
 
 class ConstraintSatisfaction {
 public:
