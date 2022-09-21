@@ -28,7 +28,7 @@ public:
     void addNumberedWall(int line, int column, int num);
     void interpretRestrictions();
     std::list<std::pair<int, int> > getUndefinedVariables();
-    bool assertViability();
+    bool assertViability() const;
     [[nodiscard]] bool enlightened() const;
     std::set<std::pair<int, int> > lightUp(int line, int column);
     std::set<std::pair<int, int> > lightDown(int line, int column);
@@ -36,11 +36,13 @@ public:
 
 private:
     void initializeBoard();
+    void giveUp(int line, int column);
     [[nodiscard]] bool isPosValid(int line, int column) const;
 
     int size;
     int lights;
     int walls;
+    bool impossible;
     std::vector<std::vector<Variable> > variableMatrix;
     std::vector<std::vector<Restriction> > restrictionMatrix;
     std::vector<std::pair<int, int> > connections;
