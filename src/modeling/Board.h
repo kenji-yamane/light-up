@@ -29,8 +29,6 @@ public:
     void interpretRestrictions();
     std::list<std::pair<int, int> > getUndefinedVariables();
     bool assertViability();
-    bool assertLightBulb(int line, int column);
-    bool assertEmpty(int line, int column);
     [[nodiscard]] bool enlightened() const;
     std::set<std::pair<int, int> > lightUp(int line, int column);
     std::set<std::pair<int, int> > lightDown(int line, int column);
